@@ -13,11 +13,13 @@ This project implements a **Site Survey-free RSSI-based Indoor Positioning Syste
   - SLSQP optimization for improved accuracy
 - **Advanced Path Loss Modeling**: Log-distance path loss model with optimizable parameters
 - **Parallel Processing**: Multi-core parameter optimization using ProcessPoolExecutor
-- **Comprehensive Statistical Analysis**: 
+- **Comprehensive Statistical Analysis**:
   - Paired statistical tests with large sample methodology
   - Normality assessment and non-parametric testing
   - Effect size analysis and practical significance evaluation
   - Multiple comparison correction (Bonferroni)
+  - Per-label error analysis and spatial correlation studies
+  - Room-based performance comparison and environment-aware algorithm selection
 - **Distance Metrics Analysis**: Euclidean, Chebyshev, and Standardized Euclidean comparisons
 - **Professional Visualization**: Publication-quality plots with customizable fonts and comprehensive graphical analysis
 
@@ -36,7 +38,8 @@ thesis/
 │   ├── 3.tools_set.ipynb         # Algorithm implementations and testing
 │   ├── 4.pairwise_distances.ipynb # Distance analysis and metrics comparison
 │   ├── 5.graphics.ipynb          # Visualization and results plotting
-│   └── 6.statistical_analysis.ipynb # Comprehensive statistical analysis
+│   ├── 6.statistical_analysis.ipynb # Comprehensive statistical analysis
+│   └── 7.room_level_analysis.ipynb # Room-based analysis and spatial correlation studies
 ├── output/                        # Generated results and analysis data
 │   ├── nn_results_by_params.csv  # NN algorithm results by parameters
 │   ├── nn_results_by_device.csv  # NN algorithm results by device
@@ -44,7 +47,12 @@ thesis/
 │   ├── optimal_parameters_by_algorithm.csv # Best parameters for each algorithm
 │   ├── grouped_device_results.csv # Device-grouped performance data
 │   ├── *_pairwise_distances_*.csv # Distance analysis results
-│   └── optimized_device_stats.csv # Statistical summaries by device
+│   ├── optimized_device_stats.csv # Statistical summaries by device
+│   ├── nn_error_by_label.csv     # NN per-label error analysis
+│   ├── slsqp_error_by_label.csv  # SLSQP per-label error analysis
+│   ├── label_room_mapping.csv    # Label to room/hall spatial mapping
+│   ├── average_error_by_room.csv # Room-level algorithm performance comparison
+│   └── error_by_room_ordered_by_nn.csv # Room analysis ordered by NN performance
 ├── figures/                       # Generated plots and publication figures
 │   ├── algorithm_statistical_comparison.pdf # Statistical comparison plots
 │   ├── positioning_error_comparison.pdf    # Algorithm performance comparison
@@ -109,6 +117,8 @@ pip install -e .
 - **Statistical Analysis**: Comprehensive paired analysis results and significance testing
 - **Pairwise Distances**: Distance analysis using various metrics (Euclidean, Chebyshev, Standardized Euclidean)
 - **Parameter Optimization**: Optimal parameter combinations for each algorithm and ρ₀ value
+- **Spatial Analysis**: Per-label error analysis and room-based performance comparisons
+- **Correlation Analysis**: Baseline performance vs optimization benefit relationship data
 
 ## 🔬 Methodology
 
@@ -164,7 +174,7 @@ Where:
 
 The project generates publication-quality visualizations including:
 
-- **Algorithm Performance Comparison**: 
+- **Algorithm Performance Comparison**:
   - Individual algorithm performance across ρ₀ values
   - Direct algorithm comparison with statistical significance markers
   - Effect size visualization with Cohen's d interpretation
@@ -173,7 +183,7 @@ The project generates publication-quality visualizations including:
   - Normality assessment with histograms and Q-Q plots
   - Paired differences distributions for non-zero cases
   - Comprehensive statistical comparison matrices
-- **Distance Analysis**: 
+- **Distance Analysis**:
   - Pairwise distance comparisons across metrics
   - Distance distribution analysis and visualization
 - **Parameter Optimization**:
@@ -216,6 +226,11 @@ jupyter notebook notebooks/5.graphics.ipynb
 jupyter notebook notebooks/6.statistical_analysis.ipynb
 ```
 
+7. **Room-Level Analysis**:
+```bash
+jupyter notebook notebooks/7.room_level_analysis.ipynb
+```
+
 ### Key Functions
 
 Located in `utils/tools.py`:
@@ -226,6 +241,8 @@ Located in `utils/tools.py`:
 - **`optimize_position()`**: SLSQP optimization algorithm
 - **`comprehensive_normality_test_large()`**: Large sample normality testing
 - **`statistical_comparison()`**: Comprehensive paired statistical analysis
+- **`get_room_from_label()`**: Spatial area classification for room-based analysis
+- **`calculate_room_averages()`**: Room-level performance aggregation
 
 ## 🎓 Academic Context
 
@@ -237,17 +254,33 @@ This project is part of a thesis research on indoor positioning systems. The wor
 - **Statistical Methodology**: Large sample analysis with appropriate corrections for multiple testing
 - **Practical Implementation**: Real-world applicability with comprehensive performance evaluation
 - **Distance Metrics Evaluation**: Multi-metric analysis for robust positioning assessment
+- **Spatial Analysis**: Room-based performance evaluation and environment-aware algorithm selection
+- **Correlation Studies**: Analysis of baseline performance vs optimization benefit relationships
 
 ## 📊 Key Findings
 
+### Overall Algorithm Performance
 - **Algorithm Performance Hierarchy**: SLSQP(+) > Mean-Chebyshev > NN in positioning accuracy
 - **Statistical Significance**: SLSQP(+) shows significant improvements at extreme ρ₀ values (40.0, 42.5, 72.5, 75.0, 77.5, 80.0 dB)
 - **Effect Sizes**: Small but consistent improvements (Cohen's d ≈ 0.073 ± 0.037)
 - **Practical Impact**: Mean improvement of ~30.6 mm in positioning accuracy
 - **Parameter Optimization**: Optimal (ρ₀, α) combinations identified for each algorithm
 - **Statistical Robustness**: Large sample analysis (n≈1420) with proper multiple testing correction
+
+### Spatial Performance Analysis (Additional Analysis)
+- **Environment-Dependent Performance**: Clear algorithmic complementarity between room types
+- **Room Performance**: SLSQP(+) shows 8.3% average improvement in enclosed rooms
+- **Hall Performance**: NN outperforms SLSQP(+) by 10.0% in open areas (halls)
+- **Strong Correlation**: r = 0.754 between NN baseline error and SLSQP(+) improvement (p < 0.01)
+- **Adaptive Strategy**: Areas with NN error > 3.2m benefit significantly from SLSQP(+) (up to 39% improvement)
+- **Practical Equivalence**: Areas with NN error < 2.5m show minimal benefit from optimization
+- **Statistical Validation**: 35.3 percentage point difference between best and worst NN performing areas
+
+### Technical Implementation
 - **Distance Metrics**: Comprehensive analysis across Euclidean, Chebyshev, and Standardized Euclidean metrics
 - **Scalability**: Parallel processing enables large-scale parameter exploration
+- **Per-label Analysis**: 148 unique spatial labels with device-averaged error calculations
+- **Room Classification**: 11 enclosed rooms + 3 open halls using prefix-based mapping system
 
 ## 🤝 Contributing
 
